@@ -16,33 +16,41 @@ dotenv.config({ path: "./config.env" });
 const HOSTNAME_LOCAL = process.env.HOSTNAME_LOCAL || "localhost";
 const HOSTNAME_DEV = process.env.HOSTNAME_DEV || "dev.example.com";
 const HOSTNAME_PROD = process.env.HOSTNAME_PROD || "prod.example.com";
-const PORT = 8082;
+const PORT = 8083;
 
 // Define allowed origins
-const allowedOrigins = [
-  "https://your-frontend-app.onrender.com",
-  "http://localhost:3000",
-];
+// const allowedOrigins = [
+//   "https://your-frontend-app.onrender.com",
+//   "http://localhost:3000",
+// ];
 
-// CORS configuration
+// // CORS configuration
+// const corsOptions = {
+//   origin: (origin, callback) => {
+//     // Allow requests with no origin (like curl, Postman, mobile apps)
+//     if (!origin) return callback(null, true);
+
+//     if (
+//       process.env.NODE_ENV === "production" &&
+//       !allowedOrigins.includes(origin)
+//     ) {
+//       return callback(new Error("CORS not allowed for this origin"), false);
+//     }
+
+//     return callback(null, true);
+//   },
+//   methods: ["GET", "POST", "PATCH", "DELETE"],
+//   allowedHeaders: ["Content-Type", "Authorization", "x-requested-with"],
+//   credentials: true,
+// };
+// // CORS configuration to allow all origins
 const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like curl, Postman, mobile apps)
-    if (!origin) return callback(null, true);
-
-    if (
-      process.env.NODE_ENV === "production" &&
-      !allowedOrigins.includes(origin)
-    ) {
-      return callback(new Error("CORS not allowed for this origin"), false);
-    }
-
-    return callback(null, true);
-  },
+  origin: "*", // Allow all origins
   methods: ["GET", "POST", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization", "x-requested-with"],
   credentials: true,
 };
+
 
 app.use(cors(corsOptions));
 
