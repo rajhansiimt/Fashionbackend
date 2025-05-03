@@ -13,7 +13,7 @@ const serverENV = process.env.NODE_ENV || "development";
 const port = process.env.PORT || 3000;
 
 // Database Connection String
-const DBConString ="mongodb://webmobril:wemobril1234@52.205.200.232:27017/backend_project_demo?authSource=admin"
+const DBConString ="mongodb+srv://Rajhans:rajhans1234@cluster0.r29kd1u.mongodb.net/"
 
 // MongoDB Connection Options
 const DBOptions = {
