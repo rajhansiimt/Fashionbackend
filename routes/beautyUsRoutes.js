@@ -88,7 +88,7 @@ router
 /**
  * @swagger
  * /project/api/v1/beauty/{id}:
- *  get:
+ *   get:
  *     summary: Get a Beauty Entry
  *     tags: [Beauty Us Registry]
  *     parameters:
@@ -99,22 +99,23 @@ router
  *         schema:
  *           type: string
  *     responses:
- *         200:
- *             description: Success
- *             content:
- *               application/json:
- *                 schema:
- *                   type: object
- *                   properties:
- *                     status:
- *                       type: string
- *                       example: success
- *                     message:
- *                       type: string
- *                       example: Got Beauty Entry
- *                     data:
- *                       $ref: '#/components/schemas/beautyUsSchema'
- *  delete:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Got Beauty Entry
+ *                 data:
+ *                   $ref: '#/components/schemas/beautyUsSchema'
+ * 
+ *   delete:
  *     summary: Delete a Beauty Entry
  *     tags: [Beauty Us Registry]
  *     parameters:
@@ -125,19 +126,19 @@ router
  *         schema:
  *           type: string
  *     responses:
- *         202:
- *             description: Deleted
- *             content:
- *               application/json:
- *                 schema:
- *                   type: object
- *                   properties:
- *                     status:
- *                       type: string
- *                       example: success
- *                     message:
- *                       type: string
- *                       example: Deleted Beauty Entry
+ *       202:
+ *         description: Deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Deleted Beauty Entry
  * 
  *   patch:
  *     summary: Update a Beauty entry by ID
@@ -165,8 +166,9 @@ router
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/BeautyUs'
+ *               $ref: '#/components/schemas/beautyUsSchema'
  */
+
 router
   .route("/:id")
   .get(beautyController.getBeautyUs)
