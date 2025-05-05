@@ -23,25 +23,32 @@ exports.getAllAboutUs = catchAsync(async (req, res, next) => {
 });
 
 exports.createAboutUs = catchAsync(async (req, res, next) => {
-  const body = {...req.body};
-  
-  if (req.files && req.files.length > 0) {
-    body.image = req.files.map(file => `/uploads/images/${file.filename}`);
+  try {
+    const body = req.body;
+
+    // Handle image upload
+    body.image = `/uploads/images/${req.file.filename}`;
+
+    logger.infoLog(`Creating with body ${JSON.stringify(body)}`);
+
+    // Create the new document
+    const doc = new AboutUsModel(body);
+
+    // Validate the document
+    await doc.validate();
+
+    // Create the record in the service
+    let data = await aboutUsPageService.createAboutUs(doc);
+
+    logger.infoLog(`Created with Id: ${JSON.stringify(data)}`);
+
+    // Send the response
+    res.status(statusCodes.CREATED).json(data);
+  } catch (error) {
+    logger.errorLog("Unable to create", error);
+    res.status(error.statusCode || statusCodes.INTERNAL_SERVER)
+      .send({ status: error.status, message: error.message });
   }
-  //  else if (req.file) {
-  //   body.image = [`/uploads/${req.file.filename}`];
-  // }
-  console.log(body);
-  console.log(body.image)
-
-  const doc = new AboutUsModel(body);
-
-  await doc.validate().catch((error) => {
-    throw new ValidationError(error.message);
-  });
-
-  const data = await aboutUsPageService.createAboutUs(doc);
-  res.status(statusCodes.CREATED).json(data);
 });
 
 exports.getAboutUs = catchAsync(async (req, res, next) => {

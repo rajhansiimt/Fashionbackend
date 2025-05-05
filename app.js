@@ -1,3 +1,4 @@
+// DEPENDENCIES
 const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
@@ -6,90 +7,50 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUI = require("swagger-ui-express");
-const bodyParser = require("body-parser");
-const app = express();
 
-// Load environment variables
+// LOAD .env
 dotenv.config({ path: "./config.env" });
 
-// Environment configuration
-const HOSTNAME_LOCAL = process.env.HOSTNAME_LOCAL || "localhost";
-const HOSTNAME_DEV = process.env.HOSTNAME_DEV || "dev.example.com";
-const HOSTNAME_PROD = process.env.HOSTNAME_PROD || "prod.example.com";
-const PORT = 8083;
+const app = express();
 
-// Define allowed origins
-// const allowedOrigins = [
-//   "https://your-frontend-app.onrender.com",
-//   "http://localhost:3000",
-// ];
-
-// // CORS configuration
-// const corsOptions = {
-//   origin: (origin, callback) => {
-//     // Allow requests with no origin (like curl, Postman, mobile apps)
-//     if (!origin) return callback(null, true);
-
-//     if (
-//       process.env.NODE_ENV === "production" &&
-//       !allowedOrigins.includes(origin)
-//     ) {
-//       return callback(new Error("CORS not allowed for this origin"), false);
-//     }
-
-//     return callback(null, true);
-//   },
-//   methods: ["GET", "POST", "PATCH", "DELETE"],
-//   allowedHeaders: ["Content-Type", "Authorization", "x-requested-with"],
-//   credentials: true,
-// };
-// // CORS configuration to allow all origins
-const corsOptions = {
-  origin: "*", // Allow all origins
-  methods: ["GET", "POST", "PATCH", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization", "x-requested-with"],
-  credentials: true,
-};
-
-
-app.use(cors(corsOptions));
-
-// Middleware setup
+// MIDDLEWARES
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(morgan("dev"));
+
+// TEMPORARY: Allow all origins to fix Swagger CORS (lock down later)
+app.use(
+  cors({
+    origin: "*", // For testing only
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// STATIC FILES
 app.use(express.static(path.join(__dirname, "./public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use(morgan("dev"));
-app.use(cookieParser());
-app.use(bodyParser.json());
-
-console.log(`✅ API running at: http://${HOSTNAME_LOCAL}:${PORT}`);
-
-// Serve static images from 'public' directory
 app.get("/images/:filename", (req, res) => {
-  const filename = req.params.filename;
+  const filename = req.params.filename;   
   const filePath = path.join(__dirname, "./public", filename);
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      res.status(404).send("File not found");
-    }
-  });
+  res.sendFile(filePath);
 });
 
-// Swagger documentation setup
+// SWAGGER CONFIGURATION
 const swaggerOptions = {
   swaggerDefinition: {
     openapi: "3.0.0",
     info: {
-      title: "Backend Project Management API Services",
+      title: "Backend Management API Services",
       version: "1.0.0",
       contact: {
         name: "Swagger Docs",
-        url: `http://${HOSTNAME_LOCAL}:${PORT}/project/api/v1/api-docs/swagger.json`,
+        url: `http://${process.env.HOSTNAME_LOCAL}:${process.env.PORT}/project/api/v1/api-docs/swagger.json`,
       },
     },
     components: {
-      securitySchemes: {
+      securitySchemas: {
         bearerAuth: {
           type: "http",
           scheme: "bearer",
@@ -100,20 +61,20 @@ const swaggerOptions = {
     security: [{ bearerAuth: [] }],
     servers: [
       {
-        url: `http://${HOSTNAME_LOCAL}:${PORT}`,
-        description: "Local Environment",
+        url: `http://${process.env.HOSTNAME_LOCAL}:${process.env.PORT}`,
+        description: "Local environment",
       },
       {
-        url: `http://${HOSTNAME_DEV}:${PORT}`,
-        description: "Development Environment",
+        url: `http://${process.env.HOSTNAME_DEV}`,
+        description: "Development environment",
       },
       {
-        url: `http://${HOSTNAME_PROD}:${PORT}`,
-        description: "Production Environment",
+        url: `http://${process.env.HOSTNAME_PROD}`,
+        description: "Production environment",
       },
     ],
   },
-  apis: ["./routes/*.js"],
+  apis: ["app.js", path.join(__dirname, "/routes/*.js")],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
@@ -131,13 +92,34 @@ app.use(
   swaggerUI.setup(swaggerDocs)
 );
 
-// API Routes
+// ROUTES
 const apiRouter = require("./routes/apiRoutes");
 app.use("/project/api/v1", apiRouter);
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://${HOSTNAME_LOCAL}:${PORT}`);
+// FRONTEND ROUTES
+app.get(
+  "/admin/*",
+  express.static(path.join(__dirname, "./public", "admin"), { maxAge: "1y" })
+);
+app.all("/admin/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "./public", "admin", "index.html"));
 });
 
+app.get(
+  "/website/*",
+  express.static(path.join(__dirname, "./public", "website"), { maxAge: "1y" })
+);
+app.all("/website/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "./public", "website", "index.html"));
+});
+
+app.get(
+  "/agent/*",
+  express.static(path.join(__dirname, "./public", "agent"), { maxAge: "1y" })
+);
+app.all("/agent/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "./public", "agent", "index.html"));
+});
+
+// EXPORT APP
 module.exports = app;
